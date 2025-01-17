@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HtmlNode
+from htmlnode import HtmlNode, LeafNode
 
 class TestHtmlNode(unittest.TestCase):
     def test_to_html(self):
@@ -38,3 +38,26 @@ class TestHtmlNode(unittest.TestCase):
             )])
         expected = 'HtmlNode(h1, This is a heading, [HtmlNode(text, This is some text, None, None)], None)'
         self.assertEqual(repr(node), expected)
+
+    def test_to_html(self):
+        node = LeafNode(
+            tag = "h1",
+            value = "This is a heading",
+            props = {
+                'role': 'heading',
+                'aria-level': '1'
+                    })
+        expected = '<h1 role="heading" aria-level="1">This is a heading</h1>'
+        self.assertEqual(node.to_html(), expected)
+
+    def test_none_tag(self):
+        node = LeafNode(
+            tag = None,
+            value = "This is a heading", 
+            props = {
+                'role': 'heading',
+                'aria-level': '1'
+                }
+            )
+        expected = 'This is a heading'
+        self.assertEqual(node.to_html(), expected)
