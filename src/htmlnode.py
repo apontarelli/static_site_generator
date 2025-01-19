@@ -14,9 +14,27 @@ class HtmlNode():
             for prop in self.props:
                 html += ' ' + prop + '="' + str(self.props[prop]) + '"'
             return html
+        return ''
 
     def __repr__(self):
         return f"HtmlNode({self.tag}, {self.value}, {self.children}, {self.props})"
+
+class ParentNode(HtmlNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError("Invalid HTML: no tag")
+        if not self.children:
+            raise ValueError("Invalid HTML: no children")
+        child_html = ''
+        for child in self.children:
+            child_html += child.to_html()
+        return f'<{self.tag}{self.props_to_html()}>{child_html}</{self.tag}>'
+
+    def __repr__(self):
+        return f"ParentNode({self.tag}, {self.children}, {self.props})"
 
 class LeafNode(HtmlNode):
     def __init__(self, tag, value, props=None):
