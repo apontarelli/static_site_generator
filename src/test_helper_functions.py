@@ -6,10 +6,11 @@ from helper_functions import (
         extract_markdown_images,
         extract_markdown_links,
         split_nodes_image,
-        split_nodes_link
+        split_nodes_link,
+        text_to_textnodes
 )
 
-class TestSplitNodesDelimiter(unittest.TestCase):
+class TestHelperFunctions(unittest.TestCase):
     def test_single_text_node(self):
         node = [TextNode("This is a simple TextNode `with code` and text", TextType.TEXT)]
         result = split_nodes_delimiter(node, "`", TextType.CODE)
@@ -58,7 +59,6 @@ class TestSplitNodesDelimiter(unittest.TestCase):
         # to implement with nesting logic
         # self.assertEqual(result, expected)
 
-class TestSplitNodesImage(unittest.TestCase):
     def test_single_image(self):
         nodes = [TextNode(
             "This is a simple text node with ![this is alt text](https://image.url) with an image",
@@ -135,7 +135,6 @@ class TestSplitNodesImage(unittest.TestCase):
         ]
         self.assertEqual(result, expected)
 
-class TestSplitNodesLink(unittest.TestCase):
     def test_single_link(self):
         nodes = [TextNode(
             "This is a simple text node with [this link](https://link.url)",
@@ -178,7 +177,6 @@ class TestSplitNodesLink(unittest.TestCase):
         ]
         self.assertEqual(result, expected)      
 
-class TestExtractMarkdownImages(unittest.TestCase):
     def test_single_image(self):
         text = "This ![amazing image](https://image.url) is an amazing image"
         result = extract_markdown_images(text)
@@ -206,7 +204,6 @@ class TestExtractMarkdownImages(unittest.TestCase):
         expected = [("", "https://image.url")]
         self.assertEqual(result, expected)
 
-class TestExtractMarkdownLinks(unittest.TestCase):
     def test_single_links(self):
         text = "This [amazing link](https://link.url) is an amazing image"
         result = extract_markdown_links(text)
@@ -234,6 +231,86 @@ class TestExtractMarkdownLinks(unittest.TestCase):
         expected = [("another link", "https://link.url")]
         self.assertEqual(result, expected)
 
+    def test_text_to_textnodes(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        result = text_to_textnodes(text)
+        expected = [
+                TextNode("This is ", TextType.TEXT),
+                TextNode("text", TextType.BOLD),
+                TextNode(" with an ", TextType.TEXT),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" word and a ", TextType.TEXT),
+                TextNode("code block", TextType.CODE),
+                TextNode(" and an ", TextType.TEXT),
+                TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+                TextNode(" and a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "https://boot.dev"),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_mixed_text_to_textnodes(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://*boot*.dev)"
+        result = text_to_textnodes(text)
+        expected = [
+                TextNode("This is ", TextType.TEXT),
+                TextNode("text", TextType.BOLD),
+                TextNode(" with an ", TextType.TEXT),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" word and a ", TextType.TEXT),
+                TextNode("code block", TextType.CODE),
+                TextNode(" and an ", TextType.TEXT),
+                TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+                TextNode(" and a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "https://*boot*.dev"),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_mismatched_tags(self):
+        text = "This is **text with an *italic** word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        result = text_to_textnodes(text)
+        expected = [
+                TextNode("This is ", TextType.TEXT),
+                TextNode("text with an *italic", TextType.BOLD),
+                TextNode(" word and a ", TextType.TEXT),
+                TextNode("code block", TextType.CODE),
+                TextNode(" and an ", TextType.TEXT),
+                TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+                TextNode(" and a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "https://boot.dev"),
+        ]
+        self.assertEqual(result, expected)
+
+    def test_empty_text(self):
+        text = ""
+        result = text_to_textnodes(text)
+        expected = [TextNode("", TextType.TEXT)]
+        self.assertEqual(result, expected)
+
+    def test_minimal_text(self):
+        text = "[link](https://example.com)"
+        result = text_to_textnodes(text)
+        expected = [TextNode("link", TextType.LINK, "https://example.com")]
+        self.assertEqual(result, expected)
+
+    def test_raw_text(self):
+        text = "nothing special at all. the most boring text in the world. never ending text that goes on and on and on and on"
+        result = text_to_textnodes(text)
+        expected = [TextNode(text, TextType.TEXT)]
+        self.assertEqual(result, expected)
+
+    def test_broken_markdown(self):
+        text = "This is **text** with an *italic* word and a code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link]https://boot.dev)"
+        result = text_to_textnodes(text)
+        expected = [
+                TextNode("This is ", TextType.TEXT),
+                TextNode("text", TextType.BOLD),
+                TextNode(" with an ", TextType.TEXT),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" word and a code block` and an ", TextType.TEXT),
+                TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+                TextNode(" and a [link]https://boot.dev)", TextType.TEXT),
+        ]
+        self.assertEqual(result, expected)
 
 if __name__ == "__main__":
     unittest.main()
