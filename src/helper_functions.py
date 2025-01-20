@@ -87,3 +87,25 @@ def text_to_textnodes(text):
     nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
     nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
     return nodes
+
+def block_to_block_type(markdown):
+    if re.match(r"^#{1,6}", markdown):
+        return "heading"
+    if re.match(r"^```(.*?)```$", markdown, re.DOTALL):
+        return "code"
+    if re.match(r"^>", markdown, re.MULTILINE):
+        return "quote"
+    if re.match(r"^[*-] ", markdown, re.MULTILINE):
+        return "unordered_list"
+    lines = markdown.split("\n")
+    expected_number = 1
+    for line in lines: 
+        if re.match(rf"^{expected_number}\. ", line):
+            expected_number += 1
+            continue
+        else:
+            break
+    else:
+        return "ordered_list"
+    return "paragraph"  
+

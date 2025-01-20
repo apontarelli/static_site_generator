@@ -8,7 +8,8 @@ from helper_functions import (
         split_nodes_image,
         split_nodes_link,
         text_to_textnodes,
-        markdown_to_blocks
+        markdown_to_blocks,
+        block_to_block_type
 )
 
 class TestHelperFunctions(unittest.TestCase):
@@ -349,6 +350,42 @@ class TestHelperFunctions(unittest.TestCase):
             "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
             "* This is the first list item in a list block\n        * This is a list item\n        * This is another list item"
             ]
+        self.assertEqual(result, expected)
+
+    def test_heading_to_block_type(self):
+        text = "### This is a h3"
+        result = block_to_block_type(text)
+        expected = "heading"
+        self.assertEqual(result, expected)
+
+    def test_code_to_block_type(self):
+        text = "```This is some code\nthis is another line of code \nthe most code```"
+        result = block_to_block_type(text)
+        expected = "code"
+        self.assertEqual(result, expected)
+
+    def test_quote_to_block_type(self):
+        text = ">This is a quote\n>The quote continues on\n>will this person ever stop talking"
+        result = block_to_block_type(text)
+        expected = "quote"
+        self.assertEqual(result, expected)
+
+    def test_unordered_to_block_type(self):
+        text = "- This is an unordered list\n* another list item with an *\n- last item i promise"
+        result = block_to_block_type(text)
+        expected = "unordered_list"
+        self.assertEqual(result, expected)
+
+    def test_ordered_to_block_type(self):
+        text = "1. This is the first item\n2. This is the second item\n3. This is the last item"
+        result = block_to_block_type(text)
+        expected = "ordered_list"
+        self.assertEqual(result, expected)
+
+    def test_paragraph_to_block_type(self):
+        text = "1. This is the first item\n* This is the second item\n3. This is the last item"
+        result = block_to_block_type(text)
+        expected = "paragraph"
         self.assertEqual(result, expected)
 
 if __name__ == "__main__":
