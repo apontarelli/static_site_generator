@@ -73,6 +73,12 @@ def extract_markdown_links(text):
     matches = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return matches
 
+def markdown_to_blocks(markdown):
+    split_blocks = markdown.strip().split('\n\n')
+    stripped_blocks = list(map(str.strip, split_blocks))
+    blocks = list(filter(None, stripped_blocks))
+    return blocks
+
 def text_to_textnodes(text):
     text_node = TextNode(text, TextType.TEXT)
     nodes = split_nodes_image([text_node])
