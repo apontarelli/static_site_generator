@@ -54,9 +54,9 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html, expected)
     
     def test_link_to_html_node(self):
-        node = TextNode("Click me", TextType.LINK)
+        node = TextNode("Click me", TextType.LINK, "https://link.com")
         html = text_node_to_html_node(node)
-        expected = LeafNode("a", "Click me")
+        expected = LeafNode("a", "Click me", {"href": "https://link.com"})
         self.assertEqual(html, expected)
 
     def text_image_to_html_node(self):
