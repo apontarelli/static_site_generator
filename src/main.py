@@ -1,11 +1,11 @@
 from utils import copy_src_to_dest
-from generate_page import generate_page
+from generate_page import generate_page_recursive
 
 def main():
     copy_src_to_dest("./static", "./public")
 
-    content = "content/index.md" 
+    content = "content/" 
     template = "template.html"
-    dest = "public/index.html"
-    generate_page(content, template, dest)
+    dest = "public/"
+    generate_page_recursive(content, template, dest)
 main()
