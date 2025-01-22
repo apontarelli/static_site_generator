@@ -1,7 +1,7 @@
 from textnode import TextNode
 from textnode import TextType
+from utils import copy_src_to_dest
 
 def main():
-    test_node = TextNode('This is a text node', TextType.BOLD, 'https://www.boot.dev')
-    print(test_node)
+    copy_src_to_dest("./static", "./public")
 main()
